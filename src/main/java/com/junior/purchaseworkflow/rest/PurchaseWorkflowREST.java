@@ -51,10 +51,10 @@ public class PurchaseWorkflowREST
 
 	@POST
 	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/getPendingTasks")
+	@Path("/getTasks")
 	public List<Purchase> getPendingTasks(String filterParams) {
 
-		List purchases = service.getPendingTasks(filterParams);
+		List purchases = service.getTasks(filterParams);
 		return purchases;
 	}
 
@@ -66,15 +66,6 @@ public class PurchaseWorkflowREST
 		Purchase purchase = service.getTaskById(id);
 		return purchase;
 
-	}
-
-	@POST
-	@Produces(MediaType.APPLICATION_JSON)
-	@Path("/getAllTasks")
-	public List<Purchase> getAllTasks(String filter) {
-
-		List purchases = service.getAllTasks();
-		return purchases;
 	}
 
 }

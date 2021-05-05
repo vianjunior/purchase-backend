@@ -3,8 +3,9 @@ package com.junior.purchaseworkflow.model;
 public class Filter
 {
 	private String requesterName;
-	private String productDescription;
-	private boolean approved;
+	private String product;
+	private String position;
+	private String approved;
 
 	public String getRequesterName()
 	{
@@ -16,22 +17,32 @@ public class Filter
 		this.requesterName = requesterName;
 	}
 
-	public String getProductDescription()
+	public String getProduct()
 	{
-		return productDescription;
+		return product;
 	}
 
-	public void setProductDescription(String productDescription)
+	public void setProduct(String product)
 	{
-		this.productDescription = productDescription;
+		this.product = product;
 	}
 
-	public boolean isApproved()
+	public String getPosition()
+	{
+		return position;
+	}
+
+	public void setPosition(String status)
+	{
+		this.position = status;
+	}
+
+	public String getApproved()
 	{
 		return approved;
 	}
 
-	public void setApproved(boolean approved)
+	public void setApproved(String approved)
 	{
 		this.approved = approved;
 	}

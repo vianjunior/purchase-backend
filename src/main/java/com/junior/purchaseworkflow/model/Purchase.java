@@ -9,8 +9,8 @@ public class Purchase
 	private long purchaseId;
 	private String requesterName;
 	private Product product;
-	private boolean hasApproval;
-	private Approval approval;
+	private String position;
+	private String approval;
 	private String startDate;
 	private String finishDate;
 
@@ -18,13 +18,13 @@ public class Purchase
 	{
 	}
 
-	public Purchase(long purchaseId, String requesterName, Product product, boolean hasApproval,
-		Approval approval, String startDate, String finishDate)
+	public Purchase(long purchaseId, String requesterName, Product product, String position,
+		String approval, String startDate, String finishDate)
 	{
 		this.purchaseId = purchaseId;
 		this.requesterName = requesterName;
 		this.product = product;
-		this.hasApproval = hasApproval;
+		this.position = position;
 		this.approval = approval;
 		this.startDate = startDate;
 		this.finishDate = finishDate;
@@ -66,25 +66,24 @@ public class Purchase
 		this.product = product;
 	}
 
-	@Column(name="hasApproval")
-	public boolean isHasApproval()
+	@Column(name="position")
+	public String getPosition()
 	{
-		return hasApproval;
+		return position;
 	}
 
-	public void setHasApproval(boolean hasApproval)
+	public void setPosition(String position)
 	{
-		this.hasApproval = hasApproval;
+		this.position = position;
 	}
 
-	@OneToOne(fetch = FetchType.EAGER, cascade=CascadeType.PERSIST)
-	@JoinColumn(name="approvalId")
-	public Approval getApproval()
+	@Column(name="approval")
+	public String getApproval()
 	{
 		return approval;
 	}
 
-	public void setApproval(Approval approval)
+	public void setApproval(String approval)
 	{
 		this.approval = approval;
 	}

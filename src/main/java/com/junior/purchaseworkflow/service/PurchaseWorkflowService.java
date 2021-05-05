@@ -4,13 +4,12 @@ import com.google.gson.Gson;
 import com.junior.purchaseworkflow.PurchaseEntityManager;
 import com.junior.purchaseworkflow.dao.PurchaseDAO;
 import com.junior.purchaseworkflow.model.Filter;
+import com.junior.purchaseworkflow.model.Product;
 import com.junior.purchaseworkflow.model.Purchase;
 import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import org.json.JSONObject;
 
 public class PurchaseWorkflowService
@@ -27,7 +26,7 @@ public class PurchaseWorkflowService
 		purchaseDAO.create(purchase);
 
 		JSONObject retorno = new JSONObject();
-		retorno.put("retorno", "Create");
+		retorno.put("retorno", "OK");
 
 		return retorno;
 	}
@@ -40,22 +39,15 @@ public class PurchaseWorkflowService
 		purchaseDAO.update(purchase);
 
 		JSONObject retorno = new JSONObject();
-		retorno.put("retorno", "ReadAll");
+		retorno.put("retorno", "OK");
 
 		return retorno;
 	}
 
-	public static List<Purchase> getPendingTasks(String filterParams) {
+	public static List<Purchase> getTasks(String filterParams) {
 
-		Gson gson = new Gson();
-		Filter filter = gson.fromJson(filterParams, Filter.class);
+		CriteriaQuery<Purchase> criteriaQuery = createQuery(filterParams);
 
-		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
-		CriteriaQuery<Purchase> criteriaQuery = criteriaBuilder.createQuery(Purchase.class);
-		Root<Purchase> root = criteriaQuery.from(Purchase.class);
-
-		criteriaQuery.select(root);
-		criteriaQuery.where(criteriaBuilder.equal(root.get("hasApproval"), false));
 		TypedQuery<Purchase> typedQuery = em.createQuery(criteriaQuery);
 		List<Purchase> purchases = purchaseDAO.getTasksByFilter(typedQuery);
 
@@ -67,18 +59,49 @@ public class PurchaseWorkflowService
 		return purchaseDAO.getById(id);
 	}
 
-	public static List<Purchase> getAllTasks(String filterParams) {
+	/**
+	 * Método que monta o filtro para realizar a consulta de registros no banco
+	 */
+	private static CriteriaQuery<Purchase> createQuery(String filterParams) {
 		Gson gson = new Gson();
 		Filter filter = gson.fromJson(filterParams, Filter.class);
+		String requesterName = filter.getRequesterName();
+		String product = filter.getProduct();
+		String position = filter.getPosition();
+		String approval = filter.getApproved();
 
 		CriteriaBuilder criteriaBuilder = em.getCriteriaBuilder();
 		CriteriaQuery<Purchase> criteriaQuery = criteriaBuilder.createQuery(Purchase.class);
+		Predicate predicate = criteriaBuilder.and();
 		Root<Purchase> root = criteriaQuery.from(Purchase.class);
-
 		criteriaQuery.select(root);
-		TypedQuery<Purchase> typedQuery = em.createQuery(criteriaQuery);
-		List<Purchase> purchases = purchaseDAO.getTasksByFilter(typedQuery);
 
-		return purchases;
+		if (!requesterName.isBlank() && !requesterName.isEmpty()) {
+			predicate = criteriaBuilder.and(predicate, criteriaBuilder.like(
+				criteriaBuilder.lower(root.get("requesterName")),
+				"%"+requesterName+"%"));
+		}
+
+		if (!product.isBlank() && !product.isEmpty()) {
+			Join<Purchase, Product> join = root.join("product");
+			Path<String> description = join.get("description");
+
+			predicate = criteriaBuilder.and(predicate, criteriaBuilder.like(
+				criteriaBuilder.lower(description), "%"+product+"%"));
+		}
+
+		if (!position.isBlank() && !position.isEmpty()) {
+			predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(
+				root.get("position"), position));
+		}
+
+		if (!approval.isBlank() && !approval.isEmpty()) {
+			predicate = criteriaBuilder.and(predicate, criteriaBuilder.equal(
+				root.get("approval"), approval));
+		}
+
+		criteriaQuery.where(predicate);
+
+		return criteriaQuery;
 	}
 }
